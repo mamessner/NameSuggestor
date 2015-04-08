@@ -13,7 +13,7 @@ def main() :
 
     # Initialize trait booleans. Will be set to true if user designates they should be on.
     isHeroOn = False
-    isVillianOn = False
+    isVillainOn = False
     isMasculineOn = False
     isFeminineOn = False
 
@@ -22,15 +22,29 @@ def main() :
     # toDo: implement: Input text file and iterate over for capitalized words and/or words that match a list of names. Store in list.
 
     # input: names directly from user
-    # toDo: implement: Read command line input from users. Store in list.
-    inputNames = input("Enter some names you like, separated by commas. Hit enter when finished.\n")
+    inputNames = input("**Enter some names you like, separated by commas. Hit enter when finished.\n")
     inputList = [name.strip() for name in inputNames.split(',')]
     userNames.extend(inputList)
 
         
     # input: desired traits
-    # toDo: implement: prompt user for which traits
+    traitsList = []
+    traits1 = input("**Enter which name traits you desire: Hero, Villain, Masculine, Feminine.\n**Type 0 or more seperated by commas: \n")
+    traits2 = [name.strip() for name in traits1.split(',')]
+    traitsList.extend(traits2)
+    if ("Hero" in traitsList) :
+    	isHeroOn = True
+    if ("Villain" in traitsList) :
+    	isVillainOn = True
+    if ("Masculine" in traitsList) :
+    	isMasculineOn = True
+    if ("Feminine" in traitsList) :
+    	isFeminineOn = True
 
+    if ("yes" in input("**Force a male name? (type 'yes' do to so)\n")) :
+    	forceMale = True
+    elif ('yes' in input("**Force a female name? (type 'yes' do to so)\n")) :
+    	forceFemale = True
 
 
     # Machine learning using features specified
@@ -46,6 +60,7 @@ def main() :
 
     # output: names
 
-    print ('hello')
+
+    print (userNames)
 
 main()
