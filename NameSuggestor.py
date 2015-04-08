@@ -26,24 +26,24 @@ def main() :
     inputList = [name.strip() for name in inputNames.split(',')]
     userNames.extend(inputList)
 
-        
+
     # input: desired traits
     traitsList = []
     traits1 = input("**Enter which name traits you desire: Hero, Villain, Masculine, Feminine.\n**Type 0 or more seperated by commas: \n")
-    traits2 = [name.strip() for name in traits1.split(',')]
+    traits2 = [name.strip().lower() for name in traits1.split(',')]
     traitsList.extend(traits2)
-    if ("Hero" in traitsList) :
+    if ("hero" in traitsList) :
     	isHeroOn = True
-    if ("Villain" in traitsList) :
+    if ("villain" in traitsList) :
     	isVillainOn = True
-    if ("Masculine" in traitsList) :
+    if ("masculine" in traitsList) :
     	isMasculineOn = True
-    if ("Feminine" in traitsList) :
+    if ("feminine" in traitsList) :
     	isFeminineOn = True
 
-    if ("yes" in input("**Force a male name? (type 'yes' do to so)\n")) :
+    if ("yes" in input("**Force a male name? (type 'yes' do to so)\n").lower()) :
     	forceMale = True
-    elif ('yes' in input("**Force a female name? (type 'yes' do to so)\n")) :
+    elif ('yes' in input("**Force a female name? (type 'yes' do to so)\n").lower()) :
     	forceFemale = True
 
 
