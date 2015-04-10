@@ -79,8 +79,23 @@ def main() :
     	print(nltk.classify.accuracy(classifier, test_set))
 
 
-    # Machine learning using inputted names from user
-    # toDo: implement using code from class as base
+    # Machine learning using inputted names from user. Labels names entered by user as good, and random other names as bad.
+    n = open('names.txt', 'r')
+    namesList = [line for line in n]
+    random.shuffle(namesList)
+    shorterNamesList = [] #This list is a list of random names equal in length to the number of names the user inputted. For comparative classification.
+    i = 0
+    while (len(shorterNamesList) <= len(userNames)) :
+    	shorterNamesList.append(namesList[i].rstrip('\n'))
+    	i = i + 1
+    labeled_user_names = ([(name, 'good') for name in userNames] + [(badName, 'bad') for badName in shorterNamesList])
+    random.shuffle(labeled_user_names)
+    featuresets = [(name_features(n), g) for (n, g) in labeled_user_names]
+    train_set, test_set = featuresets[int(len(featuresets)/2):], featuresets[:int(len(featuresets)/2)]
+    classifier = nltk.NaiveBayesClassifier.train(train_set)
+    print(classifier.show_most_informative_features(20))
+    print(nltk.classify.accuracy(classifier, test_set))
+
 
     # Run classifier on 'names.txt' or male.txt/female.txt if specified by user.
     # toDo: implement ??
