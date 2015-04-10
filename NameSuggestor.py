@@ -1,6 +1,7 @@
 #python3
 import nltk
 import random
+import re
 
 def name_features(name):
 	features = {}
@@ -27,8 +28,16 @@ def main() :
     isFeminineOn = False
 
 
-    # input: read text file
-    # toDo: implement: Input text file and iterate over for capitalized words and/or words that match a list of names. Store in list.
+    # input: read text file. Find names.
+    i = open('exampleTextInput.txt', 'r')
+    nam = open('names.txt', 'r')
+    text = i.read().lower()
+    text = re.sub('[^a-z\ \']+', " ", text)
+    print(text.split())
+    longListofNames = [name for name in nam.read().split()]
+    for name in text.split() :
+    	if name.title() in longListofNames :
+    		userNames.append(name.title())
 
     # input: names directly from user
     inputNames = input("**Enter some names you like, separated by commas. Hit enter when finished.\n")
