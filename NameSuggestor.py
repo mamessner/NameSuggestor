@@ -77,8 +77,8 @@ def main() :
     	print(nltk.classify.accuracy(classifier, test_set))
 
     if (isFeminineOn or isMasculineOn) :
-    	f = open('female.txt', 'r')
-    	m = open('male.txt', 'r')
+    	f = open('female2.txt', 'r')
+    	m = open('male2.txt', 'r')
     	labeled_fem_masc = ([(line.rstrip('\n'), 'feminine') for line in f] + [(line.rstrip('\n'), 'masculine') for line in m])
     	random.shuffle(labeled_fem_masc)
     	featuresets = [(name_features(n), fm) for (n, fm) in labeled_fem_masc]
@@ -89,7 +89,7 @@ def main() :
 
 
     # Machine learning using inputted names from user. Labels names entered by user as good, and random other names as bad.
-    n = open('names.txt', 'r')
+    n = open('names.txt', 'r') #name data from: https://github.com/hadley/data-baby-names
     namesList = [line for line in n]
     random.shuffle(namesList)
     shorterNamesList = [] #This list is a list of random names equal in length to the number of names the user inputted. For comparative classification.
