@@ -12,6 +12,7 @@ def name_features(name):
         features["has(%s)" % letter] = (letter in name.lower())
     for i in range(len(name)-1):      # adjacent letters feature
         features["has({}-{})".format(name[i].lower(), name[i+1].lower())] = True
+    features["name len"] = len(name)
     return features
 
 def main() :
