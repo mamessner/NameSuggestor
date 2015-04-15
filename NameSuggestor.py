@@ -10,6 +10,8 @@ def name_features(name):
     for letter in 'abcdefghijklmnopqrstuvwxyz':
         features["count(%s)" % letter] = name.lower().count(letter)
         features["has(%s)" % letter] = (letter in name.lower())
+    for i in range(len(name)-1):      # adjacent letters feature
+        features["has({}-{})".format(name[i].lower(), name[i+1].lower())] = True
     return features
 
 def main() :
@@ -89,7 +91,7 @@ def main() :
         train_set, test_set = featuresets[int(len(featuresets)/2):], featuresets[:int(len(featuresets)/2)]
         classifier3 = nltk.NaiveBayesClassifier.train(train_set)
         #print(classifier3.show_most_informative_features(20))
-        #print(nltk.classify3.accuracy(classifier, test_set))
+        #print(nltk.classify.accuracy(classifier3, test_set))
 
 
     # Machine learning using inputted names from user. Labels names entered by user as good, and random other names as bad.
@@ -130,7 +132,7 @@ def main() :
 
     # Run classifiers on each name from names.txt until 20 names are found that match classifications from all relevant classifiers
     n = int(input("**How many suggested names would you like? Pick a number greater than 20.\n"))
-    if n < 20:
+    while n < 20:
         n = int(input("**Please pick a number greater than 20.\n"))
     print()
     print("Suggested Names ({}): ".format(n))
