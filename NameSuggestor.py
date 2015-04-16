@@ -16,24 +16,38 @@ def name_features(name):
     return features
 
 
-def multiClassifier(hvTrait, mfTrait, userNames):
-    if hvTrait:
-        h = open('heroes.txt', 'r') # from http://babynames.net/list/heroic-names
-        v = open('villains.txt', 'r')
-        labeled_hero_villain = ([(line.rstrip('\n'), 'hero') for line in h] +
-                                [(line.rstrip('\n'), 'villain') for line in v])
-        random.shuffle(labeled_hero_villain)
-    else:
-        labeled_fem_masc = []
+def hvClassifier():
+    h = open('heroes.txt', 'r') # from http://babynames.net/list/heroic-names
+    v = open('villains.txt', 'r')
+    labeled_hero_villain = ([(line.rstrip('\n'), 'hero') for line in h] +
+                            [(line.rstrip('\n'), 'villain') for line in v])
+    random.shuffle(labeled_hero_villain)
+    featuresets = [(name_features(n), hv) for (n, hv) in labeled_hero_villain]
+    train_set, test_set = featuresets[int(len(featuresets)/2):], featuresets[:int(len(featuresets)/2)]
+    hvClassifier = nltk.NaiveBayesClassifier.train(train_set)
+    #print(hvClassifier.show_most_informative_features(20))
+    #print(nltk.classify.accuracy(hvClassifier, test_set))
+    h.close()
+    v.close()
+    return hvClassifier
 
-    if mfTrait:
-        f = open('female.txt', 'r')
-        m = open('male.txt', 'r')
-        labeled_fem_masc = ([(line.rstrip('\n'), 'feminine') for line in f] + [(line.rstrip('\n'), 'masculine') for line in m])
-        random.shuffle(labeled_fem_masc)
-    else:
-        labeled_fem_masc = []
 
+def mfClassifier():
+    f = open('female.txt', 'r')
+    m = open('male.txt', 'r')
+    labeled_fem_masc = ([(line.rstrip('\n'), 'feminine') for line in f] + [(line.rstrip('\n'), 'masculine') for line in m])
+    random.shuffle(labeled_fem_masc)
+    featuresets = [(name_features(n), fm) for (n, fm) in labeled_fem_masc]
+    train_set, test_set = featuresets[int(len(featuresets)/2):], featuresets[:int(len(featuresets)/2)]
+    mfClassifier = nltk.NaiveBayesClassifier.train(train_set)
+    #print(mfClassifier.show_most_informative_features(20))
+    #print(nltk.classify.accuracy(mfClassifier, test_set))
+    f.close()
+    m.close()
+    return mfClassifier
+
+
+def userClassifier(userNames):
     n = open('names.txt', 'r') #name data from: https://github.com/hadley/data-baby-names
     namesList = [line for line in n]
     random.shuffle(namesList)
@@ -44,16 +58,26 @@ def multiClassifier(hvTrait, mfTrait, userNames):
         i = i + 1
     labeled_user_names = ([(name, 'good') for name in userNames] + [(badName, 'bad') for badName in shorterNamesList])
     random.shuffle(labeled_user_names)
-
-    featuresets = [(name_features(n), hv) for (n, hv) in labeled_hero_villain] + \
-                  [(name_features(n), fm) for (n, fm) in labeled_fem_masc] + \
-                  [(name_features(n), g) for (n, g) in labeled_user_names]
+    featuresets = [(name_features(n), g) for (n, g) in labeled_user_names]
     train_set, test_set = featuresets[int(len(featuresets)/2):], featuresets[:int(len(featuresets)/2)]
-    classifier = nltk.NaiveBayesClassifier.train(train_set)
-    print(classifier.show_most_informative_features(20))
-    print(nltk.classify.accuracy(classifier, test_set))
-    return classifier
+    userClassifier = nltk.NaiveBayesClassifier.train(train_set)
+    #print(userClassifier.show_most_informative_features(20))
+    #print(nltk.classify.accuracy(userClassifier, test_set))
+    n.close()
+    return userClassifier
 
+
+def multiClassifier(name, hvTrait=False, mfTrait=False):
+    classification = set()
+    if hvTrait is True:
+        hv = classifiers[0].classify(name_features(name))
+        classification.add(hv)
+    if mfTrait is True:
+        mf = classifiers[1].classify(name_features(name))
+        classification.add(mf)
+    gb = classifiers[2].classify(name_features(name))
+    classification.add(gb)
+    return classification
 
 
 def main() :
@@ -81,6 +105,8 @@ def main() :
     for name in text.split() :
         if name.title() in longListofNames :
             userNames.append(name.title())
+    i.close()
+    nam.close()
 
     # input: names directly from user
     inputNames = input("**Enter some names you like, separated by commas. Hit enter when finished.\n")
@@ -110,15 +136,17 @@ def main() :
         forceFemale = True
     print()
 
-    classifier = multiClassifier((isHeroOn or isVillainOn), (isMasculineOn or isFeminineOn), userNames)
-
     # Run classifier on 'names.txt' or male.txt/female.txt if specified by user. Output 20 suggested names
     if (forceMale) :
         a = open('male2.txt', 'r')
         namesList = [line for line in a]
-    if (forceFemale) :
+        a.close()
+    elif (forceFemale) :
         a = open('female2.txt', 'r')
         namesList = [line for line in a]
+        a.close()
+    else:
+        namesList = longListofNames
 
     parameter1 = ''
     parameter2 = ''
@@ -131,6 +159,9 @@ def main() :
     if (isFeminineOn) :
         parameter2 = 'feminine'
 
+    global classifiers
+    classifiers = [hvClassifier(), mfClassifier(), userClassifier(userNames)]
+
     # Run classifiers on each name from names.txt until 20 names are found that match classifications from all relevant classifiers
     n = int(input("**How many suggested names would you like? Pick a number greater than 20.\n"))
     while n < 20:
@@ -138,33 +169,34 @@ def main() :
     print()
     print("Suggested Names ({}): ".format(n))
     random.shuffle(namesList)
+
     i = 0
     j = 0
     if ((isHeroOn or isVillainOn) and (isMasculineOn or isFeminineOn)) :
         while j < n :
-            classification = classifier.classify(namesList[i])
-            if 'good' in classification and parameter1 in classification and parameter2 in classification:
+            classification = multiClassifier(namesList[i], hvTrait=True, mfTrait=True)
+            if {'good', parameter1, parameter2}.issubset(classification):
                 print(namesList[i])
                 j = j+1
             i = i+1
     elif (isHeroOn or isVillainOn) :
         while j < n :
-            classification = classifier.classify(namesList[i])
-            if 'good' in classification and parameter1 in classification:
+            classification = multiClassifier(namesList[i], hvTrait=True)
+            if {'good', parameter1}.issubset(classification):
                 print(namesList[i])
                 j = j+1
             i = i+1
     elif (isMasculineOn or isFeminineOn) :
         while j < n :
-            classification = classifier.classify(namesList[i])
-            if 'good' in classification and parameter2 in classification:
+            classification = multiClassifier(namesList[i], mfTrait=True)
+            if {'good', parameter2}.issubset(classification):
                 print(namesList[i])
                 j = j+1
             i = i+1
     else :
         while j < n :
-            classification = classifier.classify(namesList[i])
-            if 'good' in classification:
+            classification = multiClassifier(namesList[i])
+            if {'good'}.issubset(classification):
                 print(namesList[i])
                 j = j+1
             i = i+1
