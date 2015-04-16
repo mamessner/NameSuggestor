@@ -17,6 +17,7 @@ def name_features(name):
 
 
 def hvClassifier():
+    """ Create and return a hero vs. villain classifier. """
     h = open('heroes.txt', 'r') # from http://babynames.net/list/heroic-names
     v = open('villains.txt', 'r')
     labeled_hero_villain = ([(line.rstrip('\n'), 'hero') for line in h] +
@@ -33,6 +34,7 @@ def hvClassifier():
 
 
 def mfClassifier():
+    """ Create and return a masculine vs. feminine classifier. """
     f = open('female.txt', 'r')
     m = open('male.txt', 'r')
     labeled_fem_masc = ([(line.rstrip('\n'), 'feminine') for line in f] + [(line.rstrip('\n'), 'masculine') for line in m])
@@ -48,6 +50,7 @@ def mfClassifier():
 
 
 def userClassifier(userNames):
+    """ Create and return a classifier based on user-provided names. """
     n = open('names.txt', 'r') #name data from: https://github.com/hadley/data-baby-names
     namesList = [line for line in n]
     random.shuffle(namesList)
@@ -68,6 +71,7 @@ def userClassifier(userNames):
 
 
 def multiClassifier(name, hvTrait=False, mfTrait=False):
+    """ Return labels for a name using the appropriate classifiers. """
     classification = set()
     if hvTrait is True:
         hv = classifiers[0].classify(name_features(name))
@@ -162,7 +166,7 @@ def main() :
     global classifiers
     classifiers = [hvClassifier(), mfClassifier(), userClassifier(userNames)]
 
-    # Run classifiers on each name from names.txt until 20 names are found that match classifications from all relevant classifiers
+    # Run classifiers on each name from names.txt until n names are found that match classifications from all relevant classifiers
     n = int(input("**How many suggested names would you like? Pick a number greater than 20.\n"))
     while n < 20:
         n = int(input("**Please pick a number greater than 20.\n"))
@@ -174,6 +178,7 @@ def main() :
     j = 0
     if ((isHeroOn or isVillainOn) and (isMasculineOn or isFeminineOn)) :
         while j < n :
+            # only specify the relevant traits as True; all others False by default
             classification = multiClassifier(namesList[i], hvTrait=True, mfTrait=True)
             if {'good', parameter1, parameter2}.issubset(classification):
                 print(namesList[i])
