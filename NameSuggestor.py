@@ -49,6 +49,23 @@ def mfClassifier():
     return mfClassifier
 
 
+def adClassifier():
+    """ Create and return an angel vs. demon classifier. """
+    a = open('angels.txt', 'r')
+    d = open('demons.txt', 'r')
+    labeled_ang_dem = ([(line.rstrip('\n'), 'angel') for line in a] +
+                        [(line.rstrip('\n'), 'demon') for line in d])
+    random.shuffle(labeled_ang_dem)
+    featuresets = [(name_features(n), ad) for (n, ad) in labeled_ang_dem]
+    train_set, test_set = featuresets[int(len(featuresets)/2):], featuresets[:int(len(featuresets)/2)]
+    adClassifier = nltk.NaiveBayesClassifier.train(train_set)
+    #print(adClassifier.show_most_informative_features(20))
+    #print(nltk.classify.accuracy(mfClassifier, test_set))
+    a.close()
+    d.close()
+    return adClassifier
+
+
 def userClassifier(userNames):
     """ Create and return a classifier based on user-provided names. """
     n = open('names.txt', 'r') #name data from: https://github.com/hadley/data-baby-names
@@ -70,7 +87,7 @@ def userClassifier(userNames):
     return userClassifier
 
 
-def multiClassifier(name, hvTrait=False, mfTrait=False):
+def multiClassifier(name, hvTrait=False, mfTrait=False, adTrait=False):
     """ Return labels for a name using the appropriate classifiers. """
     classification = set()
     if hvTrait is True:
@@ -79,7 +96,10 @@ def multiClassifier(name, hvTrait=False, mfTrait=False):
     if mfTrait is True:
         mf = classifiers[1].classify(name_features(name))
         classification.add(mf)
-    gb = classifiers[2].classify(name_features(name))
+    if adTrait is True:
+        ad = classifiers[2].classify(name_features(name))
+        classification.add(ad)
+    gb = classifiers[3].classify(name_features(name))
     classification.add(gb)
     return classification
 
@@ -122,7 +142,8 @@ def main() :
 
     # input: desired traits
     traitsList = []
-    traits1 = input("**Enter which name traits you desire: Hero, Villain, Masculine, Feminine.\n**Type 0 or more seperated by commas: \n")
+    traits1 = input("**Enter which name traits you desire: Hero, Villain, Angel, Demon, Masculine, Feminine.\n" + \
+                    "**Type 0 or more separated by commas: \n")
     print()
 
     traits2 = [name.strip().lower() for name in traits1.split(',')]
@@ -135,6 +156,10 @@ def main() :
         isMasculineOn = True
     if ("feminine" in traitsList) :
         isFeminineOn = True
+    if ("angel" in traitsList):
+        isAngelOn = True
+    if ("demon" in traitsList):
+        isDemonOn = True
 
     if ("yes" in input("**Force a male name? (type 'yes' do to so)\n").lower()) :
         forceMale = True
@@ -156,17 +181,23 @@ def main() :
 
     parameter1 = ''
     parameter2 = ''
+    parameter3 = ''
     if (isHeroOn) :
         parameter1 = 'hero'
-    if (isVillainOn) :
+    elif (isVillainOn) :
         parameter1 = 'villain'
     if (isMasculineOn) :
         parameter2 = 'masculine'
     if (isFeminineOn) :
         parameter2 = 'feminine'
+    if isAngelOn:
+        parameter3 = 'angel'
+    elif isDemonOn:
+        parameter3 = 'demon'
+
 
     global classifiers
-    classifiers = [hvClassifier(), mfClassifier(), userClassifier(userNames)]
+    classifiers = [hvClassifier(), mfClassifier(), adClassifier(), userClassifier(userNames)]
 
     # Run classifiers on each name from names.txt until n names are found that match classifications from all relevant classifiers
     n = int(input("**How many suggested names would you like? Pick a number greater than 20.\n"))
