@@ -87,7 +87,7 @@ def userClassifier(userNames):
     return userClassifier
 
 
-def multiClassifier(name, parameters):
+def multiClassifier(name, parameters, classifiers):
     """ Return labels for a name using the appropriate classifiers.
 
     Match each non-None element of parameters to the appropriate classifier
@@ -189,7 +189,6 @@ def main() :
     random.shuffle(namesList)
 
     # Create the list of classifiers
-    global classifiers
     classifiers = [hvClassifier(), mfClassifier(), adClassifier(), userClassifier(userNames)]
 
     # parameters starts as a list of Nones (as many as there are classifiers) and elements are updated
@@ -218,7 +217,7 @@ def main() :
     i = 0
     j = 0
     while j < n:
-        classification = multiClassifier(namesList[i], parameters)
+        classification = multiClassifier(namesList[i], parameters, classifiers)
         if onParameters.issubset(classification):
             print(namesList[i])
             j = j+1
