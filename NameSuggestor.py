@@ -64,8 +64,8 @@ def userClassifier(userNames):
     featuresets = [(name_features(n), g) for (n, g) in labeled_user_names]
     train_set, test_set = featuresets[int(len(featuresets)/2):], featuresets[:int(len(featuresets)/2)]
     userClassifier = nltk.NaiveBayesClassifier.train(train_set)
-    #print(userClassifier.show_most_informative_features(20))
-    #print(nltk.classify.accuracy(userClassifier, test_set))
+    print(userClassifier.show_most_informative_features(20))
+    print(nltk.classify.accuracy(userClassifier, test_set))
     n.close()
     return userClassifier
 
@@ -101,7 +101,9 @@ def main() :
 
 
     # input: read text file. Find names.
-    i = open('exampleTextInput.txt', 'r')
+    inputFile = input("**Enter the name of a text file containing a story you've written.\n")
+    print()
+    i = open(inputFile, 'r')
     nam = open('names.txt', 'r')
     text = i.read().lower()
     text = re.sub('[^a-z\ \']+', " ", text)
@@ -176,6 +178,7 @@ def main() :
 
     i = 0
     j = 0
+    # This could be shortened to "if parameter1 and parameter2" but maybe less readable?
     if ((isHeroOn or isVillainOn) and (isMasculineOn or isFeminineOn)) :
         while j < n :
             # only specify the relevant traits as True; all others False by default
