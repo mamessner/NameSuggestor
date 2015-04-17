@@ -60,7 +60,7 @@ def adClassifier():
     train_set, test_set = featuresets[int(len(featuresets)/2):], featuresets[:int(len(featuresets)/2)]
     adClassifier = nltk.NaiveBayesClassifier.train(train_set)
     #print(adClassifier.show_most_informative_features(20))
-    #print(nltk.classify.accuracy(mfClassifier, test_set))
+    #print(nltk.classify.accuracy(adClassifier, test_set))
     a.close()
     d.close()
     return adClassifier
@@ -81,25 +81,22 @@ def userClassifier(userNames):
     featuresets = [(name_features(n), g) for (n, g) in labeled_user_names]
     train_set, test_set = featuresets[int(len(featuresets)/2):], featuresets[:int(len(featuresets)/2)]
     userClassifier = nltk.NaiveBayesClassifier.train(train_set)
-    print(userClassifier.show_most_informative_features(20))
-    print(nltk.classify.accuracy(userClassifier, test_set))
+    #print(userClassifier.show_most_informative_features(20))
+    #print(nltk.classify.accuracy(userClassifier, test_set))
     n.close()
     return userClassifier
 
 
-def multiClassifier(name, hvTrait=False, mfTrait=False, adTrait=False):
-    """ Return labels for a name using the appropriate classifiers. """
+def multiClassifier(name, parameters):
+    """ Return labels for a name using the appropriate classifiers.
+
+    Match each non-None element of parameters to the appropriate classifier
+    and return the overall classification. """
     classification = set()
-    if hvTrait is True:
-        hv = classifiers[0].classify(name_features(name))
-        classification.add(hv)
-    if mfTrait is True:
-        mf = classifiers[1].classify(name_features(name))
-        classification.add(mf)
-    if adTrait is True:
-        ad = classifiers[2].classify(name_features(name))
-        classification.add(ad)
-    gb = classifiers[3].classify(name_features(name))
+    for i in range(len(parameters)):
+        if parameters[i] is not None:
+            classification.add(classifiers[i].classify(name_features(name)))
+    gb = classifiers[len(parameters)].classify(name_features(name))
     classification.add(gb)
     return classification
 
@@ -118,6 +115,9 @@ def main() :
     isVillainOn = False
     isMasculineOn = False
     isFeminineOn = False
+    isAngelOn = False
+    isDemonOn = False
+
 
 
     # input: read text file. Find names.
@@ -179,25 +179,6 @@ def main() :
     else:
         namesList = longListofNames
 
-    parameter1 = ''
-    parameter2 = ''
-    parameter3 = ''
-    if (isHeroOn) :
-        parameter1 = 'hero'
-    elif (isVillainOn) :
-        parameter1 = 'villain'
-    if (isMasculineOn) :
-        parameter2 = 'masculine'
-    if (isFeminineOn) :
-        parameter2 = 'feminine'
-    if isAngelOn:
-        parameter3 = 'angel'
-    elif isDemonOn:
-        parameter3 = 'demon'
-
-
-    global classifiers
-    classifiers = [hvClassifier(), mfClassifier(), adClassifier(), userClassifier(userNames)]
 
     # Run classifiers on each name from names.txt until n names are found that match classifications from all relevant classifiers
     n = int(input("**How many suggested names would you like? Pick a number greater than 20.\n"))
@@ -207,37 +188,40 @@ def main() :
     print("Suggested Names ({}): ".format(n))
     random.shuffle(namesList)
 
+    # Create the list of classifiers
+    global classifiers
+    classifiers = [hvClassifier(), mfClassifier(), adClassifier(), userClassifier(userNames)]
+
+    # parameters starts as a list of Nones (as many as there are classifiers) and elements are updated
+    parameters = [None]*(len(classifiers)-1)
+    if (isHeroOn) :
+        parameters[0] = 'hero'
+    elif (isVillainOn) :
+        parameters[0] = 'villain'
+    if (isMasculineOn) :
+        parameters[1] = 'masculine'
+    elif (isFeminineOn) :
+        parameters[1] = 'feminine'
+    if isAngelOn:
+        parameters[2] = 'angel'
+    elif isDemonOn:
+        parameters[2] = 'demon'
+
+    # onParameters contains only the relevant ones
+    onParameters = set([x for x in parameters if x is not None])
+    #print("parameters: {}".format(parameters))
+    #print("onParameters: {}".format(onParameters))
+
+
+    # Pass multiClassifier the entire set of parameters and print a name if
+    # the classification matches the desired traits.
     i = 0
     j = 0
-    # This could be shortened to "if parameter1 and parameter2" but maybe less readable?
-    if ((isHeroOn or isVillainOn) and (isMasculineOn or isFeminineOn)) :
-        while j < n :
-            # only specify the relevant traits as True; all others False by default
-            classification = multiClassifier(namesList[i], hvTrait=True, mfTrait=True)
-            if {'good', parameter1, parameter2}.issubset(classification):
-                print(namesList[i])
-                j = j+1
-            i = i+1
-    elif (isHeroOn or isVillainOn) :
-        while j < n :
-            classification = multiClassifier(namesList[i], hvTrait=True)
-            if {'good', parameter1}.issubset(classification):
-                print(namesList[i])
-                j = j+1
-            i = i+1
-    elif (isMasculineOn or isFeminineOn) :
-        while j < n :
-            classification = multiClassifier(namesList[i], mfTrait=True)
-            if {'good', parameter2}.issubset(classification):
-                print(namesList[i])
-                j = j+1
-            i = i+1
-    else :
-        while j < n :
-            classification = multiClassifier(namesList[i])
-            if {'good'}.issubset(classification):
-                print(namesList[i])
-                j = j+1
-            i = i+1
+    while j < n:
+        classification = multiClassifier(namesList[i], parameters)
+        if onParameters.issubset(classification):
+            print(namesList[i])
+            j = j+1
+        i = i+1
 
 main()
