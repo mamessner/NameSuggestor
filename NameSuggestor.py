@@ -3,6 +3,29 @@ import nltk
 import random
 import re
 
+def process(document):
+    """ Reurn the named entities in a document using Named Entity Recognition """
+    sentences = nltk.sent_tokenize(document)
+    sentences = [nltk.word_tokenize(sent) for sent in sentences]
+    sentences = [nltk.pos_tag(sent) for sent in sentences]
+    namedEnt = [nltk.ne_chunk(sent) for sent in sentences]
+    names = []
+
+    # Make list of words in english to compare names to. Name not counted as a name if it's found as an English word.
+    # This causes some actual names to be left off, but also eliminates things that were improperly classified as names by nltk.
+    enWd = open('wordsEn.txt', 'r')
+    wordsList = [word.title() for word in enWd.read().split()]
+    enWd.close()
+
+    # Pick out words tagged as "PERSON" from the tree. Uses regular expressions.
+    for ent in namedEnt :
+        for line in ent :
+            line = str(line)
+            m = re.search('(?<=PERSON )\w+', line)
+            if m is not None and str(m.group(0)) not in names and str(m.group(0)) not in wordsList:
+            	names.append(str(m.group(0)))
+    return names
+
 def name_features(name):
     features = {}
     features["first_letter"] = name[0].lower()
@@ -118,27 +141,23 @@ def main() :
     isAngelOn = False
     isDemonOn = False
 
-
-
-    # input: read text file. Find names.
-    inputFile = input("**Enter the name of a text file containing a story you've written.\n")
+    # input: read text file. Find names through Named Entity Recognition
+    inputFile = input("**Enter the name of a text file containing a story you've written (hit enter to skip).\n")
     print()
-    i = open(inputFile, 'r')
-    nam = open('names.txt', 'r')
-    text = i.read().lower()
-    text = re.sub('[^a-z\ \']+', " ", text)
-    longListofNames = [name for name in nam.read().split()]
-    for name in text.split() :
-        if name.title() in longListofNames :
-            userNames.append(name.title())
-    i.close()
-    nam.close()
+    if (inputFile is not "") : #if user doesn't enter anything, skip this.
+    	i = open(inputFile, 'r')
+    	userNames.extend(process(i.read()))
+    	i.close()
+    	print("Names from the text file provided: ")
+    	print(userNames)
+    	print()
 
     # input: names directly from user
     inputNames = input("**Enter some names you like, separated by commas. Hit enter when finished.\n")
     print()
-    inputList = [name.strip() for name in inputNames.split(',')]
-    userNames.extend(inputList)
+    if(inputNames is not "") :
+    	inputList = [name.strip() for name in inputNames.split(',')]
+    	userNames.extend(inputList)
 
     # input: desired traits
     traitsList = []
@@ -177,11 +196,17 @@ def main() :
         namesList = [line for line in a]
         a.close()
     else:
+        nam = open('names.txt', 'r')
+        longListofNames = [name for name in nam.read().split()]
+        nam.close()
         namesList = longListofNames
 
 
     # Run classifiers on each name from names.txt until n names are found that match classifications from all relevant classifiers
-    n = int(input("**How many suggested names would you like? Pick a number greater than 20.\n"))
+    n = input("**How many suggested names would you like? Pick a number greater than 20.\n")
+    if n is "" :
+    	n = "20"
+    n = int(n)
     while n < 20:
         n = int(input("**Please pick a number greater than 20.\n"))
     print()
