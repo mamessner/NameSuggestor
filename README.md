@@ -8,3 +8,5 @@ NLTK, several input text files with lists of names, and the desired traits of
 the character the user is naming. The classifier determines which features are 
 most important to the user by finding commonalities between user-provided names 
 and traits.
+
+** Run NameSuggestor.py **
