@@ -130,6 +130,8 @@ def main() :
     forceMale = False
     forceFemale = False
 
+    forceFantasy = False
+
      # Initialize list for user provided names. Both names from text files and from command line are listed in userNames.
     userNames = []
 
@@ -180,14 +182,20 @@ def main() :
     if ("demon" in traitsList):
         isDemonOn = True
 
-    if ("yes" in input("**Force a male name? (type 'yes' do to so)\n").lower()) :
+    if ("yes" in input("**Force a candidate name from a fantasy list? If so you cannot force a gender. (Type 'yes' do to so)\n").lower()) :
+        forceFantasy = True
+    elif ("yes" in input("**Force a male name? (type 'yes' do to so)\n").lower()) :
         forceMale = True
     elif ('yes' in input("**Force a female name? (type 'yes' do to so)\n").lower()) :
         forceFemale = True
     print()
 
     # Run classifier on 'names.txt' or male.txt/female.txt if specified by user. Output 20 suggested names
-    if (forceMale) :
+    if (forceFantasy) :
+        f = open("fantasyNames.txt", 'r') #from http://www.creative-role-playing.com/fantasy-sounding-names/
+        namesList = [fname for fname in f.read().split()]
+        f.close()
+    elif (forceMale) :
         a = open('male2.txt', 'r')
         namesList = [line for line in a]
         a.close()
