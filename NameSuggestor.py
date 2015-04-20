@@ -2,6 +2,7 @@
 import nltk
 import random
 import re
+import os
 
 def process(document):
     """ Reurn the named entities in a document using Named Entity Recognition """
@@ -47,7 +48,7 @@ def hvClassifier():
                             [(line.rstrip('\n'), 'villain') for line in v])
     random.shuffle(labeled_hero_villain)
     featuresets = [(name_features(n), hv) for (n, hv) in labeled_hero_villain]
-    train_set, test_set = featuresets[int(len(featuresets)/2):], featuresets[:int(len(featuresets)/2)]
+    train_set, test_set = featuresets[int(len(featuresets)/4):], featuresets[:int(len(featuresets)/4)]
     hvClassifier = nltk.NaiveBayesClassifier.train(train_set)
     #print(hvClassifier.show_most_informative_features(20))
     #print(nltk.classify.accuracy(hvClassifier, test_set))
@@ -63,7 +64,7 @@ def mfClassifier():
     labeled_fem_masc = ([(line.rstrip('\n'), 'feminine') for line in f] + [(line.rstrip('\n'), 'masculine') for line in m])
     random.shuffle(labeled_fem_masc)
     featuresets = [(name_features(n), fm) for (n, fm) in labeled_fem_masc]
-    train_set, test_set = featuresets[int(len(featuresets)/2):], featuresets[:int(len(featuresets)/2)]
+    train_set, test_set = featuresets[int(len(featuresets)/4):], featuresets[:int(len(featuresets)/4)]
     mfClassifier = nltk.NaiveBayesClassifier.train(train_set)
     #print(mfClassifier.show_most_informative_features(20))
     #print(nltk.classify.accuracy(mfClassifier, test_set))
@@ -80,13 +81,29 @@ def adClassifier():
                         [(line.rstrip('\n'), 'demon') for line in d])
     random.shuffle(labeled_ang_dem)
     featuresets = [(name_features(n), ad) for (n, ad) in labeled_ang_dem]
-    train_set, test_set = featuresets[int(len(featuresets)/2):], featuresets[:int(len(featuresets)/2)]
+    train_set, test_set = featuresets[int(len(featuresets)/4):], featuresets[:int(len(featuresets)/4)]
     adClassifier = nltk.NaiveBayesClassifier.train(train_set)
     #print(adClassifier.show_most_informative_features(20))
     #print(nltk.classify.accuracy(adClassifier, test_set))
     a.close()
     d.close()
     return adClassifier
+
+def pdClassifier():
+    """ Create and return an pokemon vs. digimon classifier. """
+    p = open('pokemon.txt', 'r')
+    d = open('digimon.txt', 'r')
+    labeled_pok_dig = ([(line.rstrip('\n'), 'pokemon') for line in p] +
+                        [(line.rstrip('\n'), 'digimon') for line in d])
+    random.shuffle(labeled_pok_dig)
+    featuresets = [(name_features(n), pd) for (n, pd) in labeled_pok_dig]
+    train_set, test_set = featuresets[int(len(featuresets)/4):], featuresets[:int(len(featuresets)/4)]
+    pdClassifier = nltk.NaiveBayesClassifier.train(train_set)
+    #print(pdClassifier.show_most_informative_features(20))
+    #print(nltk.classify.accuracy(pdClassifier, test_set))
+    p.close()
+    d.close()
+    return pdClassifier
 
 
 def userClassifier(userNames):
@@ -102,7 +119,7 @@ def userClassifier(userNames):
     labeled_user_names = ([(name, 'good') for name in userNames] + [(badName, 'bad') for badName in shorterNamesList])
     random.shuffle(labeled_user_names)
     featuresets = [(name_features(n), g) for (n, g) in labeled_user_names]
-    train_set, test_set = featuresets[int(len(featuresets)/2):], featuresets[:int(len(featuresets)/2)]
+    train_set, test_set = featuresets[int(len(featuresets)/4):], featuresets[:int(len(featuresets)/4)]
     userClassifier = nltk.NaiveBayesClassifier.train(train_set)
     #print(userClassifier.show_most_informative_features(20))
     #print(nltk.classify.accuracy(userClassifier, test_set))
@@ -142,16 +159,21 @@ def main() :
     isFeminineOn = False
     isAngelOn = False
     isDemonOn = False
+    isPokemonOn = False
+    isDigimonOn = False
 
     # input: read text file. Find names through Named Entity Recognition
     inputFile = input("**Enter the name of a text file containing a story you've written (hit enter to skip).\n")
     print()
-    if (inputFile is not "") : #if user doesn't enter anything, skip this.
+    if (inputFile is not "" and os.path.exists(inputFile)) : #if user doesn't enter anything, skip this.
     	i = open(inputFile, 'r')
     	userNames.extend(process(i.read()))
     	i.close()
     	print("Names from the text file provided: ")
     	print(userNames)
+    	print()
+    else :
+    	print("Text file input not used.")
     	print()
 
     # input: names directly from user
@@ -163,7 +185,7 @@ def main() :
 
     # input: desired traits
     traitsList = []
-    traits1 = input("**Enter which name traits you desire: Hero, Villain, Angel, Demon, Masculine, Feminine.\n" + \
+    traits1 = input("**Enter which name traits you desire: Hero, Villain, Angel, Demon, Pokemon, Digimon, Masculine, Feminine.\n" + \
                     "**Type 0 or more separated by commas: \n")
     print()
 
@@ -181,6 +203,10 @@ def main() :
         isAngelOn = True
     if ("demon" in traitsList):
         isDemonOn = True
+    if ("pokemon" in traitsList) :
+    	isPokemonOn = True
+    if ("digimon" in traitsList) :
+    	isDigimonOn = True
 
     if ("yes" in input("**Force a candidate name from a fantasy list? If so you cannot force a gender. (Type 'yes' do to so)\n").lower()) :
         forceFantasy = True
@@ -222,7 +248,7 @@ def main() :
     random.shuffle(namesList)
 
     # Create the list of classifiers
-    classifiers = [hvClassifier(), mfClassifier(), adClassifier(), userClassifier(userNames)]
+    classifiers = [hvClassifier(), mfClassifier(), adClassifier(), pdClassifier(), userClassifier(userNames)]
 
     # parameters starts as a list of Nones (as many as there are classifiers) and elements are updated
     parameters = [None]*(len(classifiers)-1)
@@ -238,6 +264,10 @@ def main() :
         parameters[2] = 'angel'
     elif isDemonOn:
         parameters[2] = 'demon'
+    if isPokemonOn :
+    	parameters[3] = 'pokemon'
+    elif isDigimonOn :
+    	parameters[3] = 'digimon'
 
     # onParameters contains only the relevant ones
     onParameters = set([x for x in parameters if x is not None])
