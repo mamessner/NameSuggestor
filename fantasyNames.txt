@@ -577,7 +577,7 @@ Osen	Oshawal	Osondrea	Ospar	Osprey
 Osten	Otaiy	Othelen	Othkar	Otho
 Othran	Otlen	Otsuka	Otto	Ottobien
 Ount	Ovel	Owain	Owin	Oxbaren
-Ozorak	O�tho	Pack	Padan	Padishah
+Ozorak	Pack	Padan	Padishah
 Padrias	Padricus	Padys	Paeld	Pagetti
 Palid	Pallantides	Paloadrin	Palomides	Palus
 Papur	Parale	Parch	Pardor	Parele
@@ -590,7 +590,7 @@ Pelles	Pelops	Pelphides	Pelthros	Pemba
 Pender	Pendragon	Pendus	Pengarth	Pensif
 Pepin	Pepita	Pepsi	Peramee	Perder
 Peredon	Peregrin	Pereta	Pereth	Perith
-Peri�el	Perle	Perol	Peronn	Peter
+Perle	Perol	Peronn	Peter
 Pethcines	Pethros	Pethsine	Petita	Petrad
 Petroman	Petter	Phairdon	Phames	Phara
 Phardir	Pharysene	Pheblon	Phemedes	Phen
