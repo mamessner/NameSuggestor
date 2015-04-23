@@ -152,16 +152,6 @@ def main() :
      # Initialize list for user provided names. Both names from text files and from command line are listed in userNames.
     userNames = []
 
-    # Initialize trait booleans. Will be set to true if user designates they should be on.
-    isHeroOn = False
-    isVillainOn = False
-    isMasculineOn = False
-    isFeminineOn = False
-    isAngelOn = False
-    isDemonOn = False
-    isPokemonOn = False
-    isDigimonOn = False
-
     # input: read text file. Find names through Named Entity Recognition
     inputFile = input("**Enter the name of a text file containing a story you've written (hit enter to skip).\n")
     print()
@@ -191,22 +181,7 @@ def main() :
 
     traits2 = [name.strip().lower() for name in traits1.split(',')]
     traitsList.extend(traits2)
-    if ("hero" in traitsList) :
-        isHeroOn = True
-    if ("villain" in traitsList) :
-        isVillainOn = True
-    if ("masculine" in traitsList) :
-        isMasculineOn = True
-    if ("feminine" in traitsList) :
-        isFeminineOn = True
-    if ("angel" in traitsList):
-        isAngelOn = True
-    if ("demon" in traitsList):
-        isDemonOn = True
-    if ("pokemon" in traitsList) :
-    	isPokemonOn = True
-    if ("digimon" in traitsList) :
-    	isDigimonOn = True
+
 
     if ("yes" in input("**Force a candidate name from a fantasy list? If so you cannot force a gender. (Type 'yes' do to so)\n").lower()) :
         forceFantasy = True
@@ -252,22 +227,22 @@ def main() :
 
     # parameters starts as a list of Nones (as many as there are classifiers) and elements are updated
     parameters = [None]*(len(classifiers)-1)
-    if (isHeroOn) :
+    if ("hero" in traitsList) :
         parameters[0] = 'hero'
-    elif (isVillainOn) :
+    if ("villain" in traitsList) :
         parameters[0] = 'villain'
-    if (isMasculineOn) :
+    if ("masculine" in traitsList) :
         parameters[1] = 'masculine'
-    elif (isFeminineOn) :
+    if ("feminine" in traitsList) :
         parameters[1] = 'feminine'
-    if isAngelOn:
+    if ("angel" in traitsList):
         parameters[2] = 'angel'
-    elif isDemonOn:
+    if ("demon" in traitsList):
         parameters[2] = 'demon'
-    if isPokemonOn :
+    if ("pokemon" in traitsList) :
     	parameters[3] = 'pokemon'
-    elif isDigimonOn :
-    	parameters[3] = 'digimon'
+    if ("digimon" in traitsList) :
+        parameters[3] = 'digimon'
 
     # onParameters contains only the relevant ones
     onParameters = set([x for x in parameters if x is not None])
@@ -279,7 +254,7 @@ def main() :
     # the classification matches the desired traits.
     i = 0
     j = 0
-    while j < n:
+    while j < n and i < len(namesList):
         classification = multiClassifier(namesList[i], parameters, classifiers)
         if onParameters.issubset(classification):
             print(namesList[i])
