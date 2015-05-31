@@ -34,9 +34,12 @@ def name_features(name):
     for letter in 'abcdefghijklmnopqrstuvwxyz':
         features["count(%s)" % letter] = name.lower().count(letter)
         features["has(%s)" % letter] = (letter in name.lower())
-    for i in range(len(name)-1):      # adjacent letters feature
+    for i in range(len(name)-1):     # letter bigrams 
         features["has({}-{})".format(name[i].lower(), name[i+1].lower())] = True
-    features["name len"] = len(name)
+    if len(name) < 6:
+        features["name len"] = 'short'
+    else:
+        features["name len"] = 'long'
     return features
 
 
