@@ -14,7 +14,7 @@ def process(document):
 
     # Make list of words in english to compare names to. Name not counted as a name if it's found as an English word.
     # This causes some actual names to be left off, but also eliminates things that were improperly classified as names by nltk.
-    enWd = open('wordsEn.txt', 'r')
+    enWd = open('text_files/wordsEn.txt', 'r')
     wordsList = [word.title() for word in enWd.read().split()]
     enWd.close()
 
@@ -34,7 +34,7 @@ def name_features(name):
     for letter in 'abcdefghijklmnopqrstuvwxyz':
         features["count(%s)" % letter] = name.lower().count(letter)
         features["has(%s)" % letter] = (letter in name.lower())
-    for i in range(len(name)-1):     # letter bigrams 
+    for i in range(len(name)-1):     # letter bigrams
         features["has({}-{})".format(name[i].lower(), name[i+1].lower())] = True
     if len(name) < 6:
         features["name len"] = 'short'
@@ -45,8 +45,8 @@ def name_features(name):
 
 def hvClassifier():
     """ Create and return a hero vs. villain classifier. """
-    h = open('heroes.txt', 'r') # from http://babynames.net/list/heroic-names
-    v = open('villains.txt', 'r')
+    h = open('text_files/heroes.txt', 'r') # from http://babynames.net/list/heroic-names
+    v = open('text_files/villains.txt', 'r')
     labeled_hero_villain = ([(line.rstrip('\n'), 'hero') for line in h] +
                             [(line.rstrip('\n'), 'villain') for line in v])
     random.shuffle(labeled_hero_villain)
@@ -62,8 +62,8 @@ def hvClassifier():
 
 def mfClassifier():
     """ Create and return a masculine vs. feminine classifier. """
-    f = open('female.txt', 'r')
-    m = open('male.txt', 'r')
+    f = open('text_files/female.txt', 'r')
+    m = open('text_files/male.txt', 'r')
     labeled_fem_masc = ([(line.rstrip('\n'), 'feminine') for line in f] + [(line.rstrip('\n'), 'masculine') for line in m])
     random.shuffle(labeled_fem_masc)
     featuresets = [(name_features(n), fm) for (n, fm) in labeled_fem_masc]
@@ -78,8 +78,8 @@ def mfClassifier():
 
 def adClassifier():
     """ Create and return an angel vs. demon classifier. """
-    a = open('angels.txt', 'r')
-    d = open('demons.txt', 'r')
+    a = open('text_files/angels.txt', 'r')
+    d = open('text_files/demons.txt', 'r')
     labeled_ang_dem = ([(line.rstrip('\n'), 'angel') for line in a] +
                         [(line.rstrip('\n'), 'demon') for line in d])
     random.shuffle(labeled_ang_dem)
@@ -94,8 +94,8 @@ def adClassifier():
 
 def pdClassifier():
     """ Create and return an pokemon vs. digimon classifier. """
-    p = open('pokemon.txt', 'r')
-    d = open('digimon.txt', 'r')
+    p = open('text_files/pokemon.txt', 'r')
+    d = open('text_files/digimon.txt', 'r')
     labeled_pok_dig = ([(line.rstrip('\n'), 'pokemon') for line in p] +
                         [(line.rstrip('\n'), 'digimon') for line in d])
     random.shuffle(labeled_pok_dig)
@@ -111,7 +111,7 @@ def pdClassifier():
 
 def userClassifier(userNames):
     """ Create and return a classifier based on user-provided names. """
-    n = open('names.txt', 'r') #name data from: https://github.com/hadley/data-baby-names
+    n = open('text_files/names.txt', 'r') #name data from: https://github.com/hadley/data-baby-names
     namesList = [line for line in n]
     random.shuffle(namesList)
     shorterNamesList = [] #This list is a list of random names equal in length to the number of names the user inputted. For comparative classification.
@@ -196,19 +196,19 @@ def main() :
 
     # Run classifier on 'names.txt' or male.txt/female.txt if specified by user. Output 20 suggested names
     if (forceFantasy) :
-        f = open("fantasyNames.txt", 'r') #from http://www.creative-role-playing.com/fantasy-sounding-names/
+        f = open("text_files/fantasyNames.txt", 'r') #from http://www.creative-role-playing.com/fantasy-sounding-names/
         namesList = [fname for fname in f.read().split()]
         f.close()
     elif (forceMale) :
-        a = open('male2.txt', 'r')
+        a = open('text_files/male2.txt', 'r')
         namesList = [line for line in a]
         a.close()
     elif (forceFemale) :
-        a = open('female2.txt', 'r')
+        a = open('text_files/female2.txt', 'r')
         namesList = [line for line in a]
         a.close()
     else:
-        nam = open('names.txt', 'r')
+        nam = open('text_files/names.txt', 'r')
         longListofNames = [name for name in nam.read().split()]
         nam.close()
         namesList = longListofNames
