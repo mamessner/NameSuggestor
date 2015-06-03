@@ -1,5 +1,6 @@
 #python3
 import nltk
+from nltk.corpus.reader import WordListCorpusReader
 import random
 import re
 import os
@@ -43,90 +44,83 @@ def name_features(name):
     return features
 
 
-def hvClassifier():
+def hvClassifier(namesReader):
     """ Create and return a hero vs. villain classifier. """
-    h = open('text_files/heroes.txt', 'r') # from http://babynames.net/list/heroic-names
-    v = open('text_files/villains.txt', 'r')
-    labeled_hero_villain = ([(line.rstrip('\n'), 'hero') for line in h] +
-                            [(line.rstrip('\n'), 'villain') for line in v])
+    heroes = namesReader.words('heroes.txt') # from http://babynames.net/list/heroic-names
+    villains = namesReader.words('villains.txt')
+    labeled_hero_villain = ([(line.rstrip('\n'), 'hero') for line in heroes] +
+                            [(line.rstrip('\n'), 'villain') for line in villains])
     random.shuffle(labeled_hero_villain)
     featuresets = [(name_features(n), hv) for (n, hv) in labeled_hero_villain]
     train_set, test_set = featuresets[int(len(featuresets)/4):], featuresets[:int(len(featuresets)/4)]
     hvClassifier = nltk.NaiveBayesClassifier.train(train_set)
     #print(hvClassifier.show_most_informative_features(20))
     #print(nltk.classify.accuracy(hvClassifier, test_set))
-    h.close()
-    v.close()
     return hvClassifier
 
 
-def mfClassifier():
+def mfClassifier(namesReader):
     """ Create and return a masculine vs. feminine classifier. """
-    f = open('text_files/female.txt', 'r')
-    m = open('text_files/male.txt', 'r')
-    labeled_fem_masc = ([(line.rstrip('\n'), 'feminine') for line in f] + [(line.rstrip('\n'), 'masculine') for line in m])
+    female = namesReader.words('female.txt')
+    male = namesReader.words('male.txt')
+    labeled_fem_masc = ([(line.rstrip('\n'), 'feminine') for line in female] +
+            [(line.rstrip('\n'), 'masculine') for line in male])
     random.shuffle(labeled_fem_masc)
     featuresets = [(name_features(n), fm) for (n, fm) in labeled_fem_masc]
     train_set, test_set = featuresets[int(len(featuresets)/4):], featuresets[:int(len(featuresets)/4)]
     mfClassifier = nltk.NaiveBayesClassifier.train(train_set)
     #print(mfClassifier.show_most_informative_features(20))
     #print(nltk.classify.accuracy(mfClassifier, test_set))
-    f.close()
-    m.close()
     return mfClassifier
 
 
-def adClassifier():
+def adClassifier(namesReader):
     """ Create and return an angel vs. demon classifier. """
-    a = open('text_files/angels.txt', 'r')
-    d = open('text_files/demons.txt', 'r')
-    labeled_ang_dem = ([(line.rstrip('\n'), 'angel') for line in a] +
-                        [(line.rstrip('\n'), 'demon') for line in d])
+    angels = namesReader.words('angels.txt')
+    demons = namesReader.words('demons.txt')
+    labeled_ang_dem = ([(line.rstrip('\n'), 'angel') for line in angels] +
+                        [(line.rstrip('\n'), 'demon') for line in demons])
     random.shuffle(labeled_ang_dem)
     featuresets = [(name_features(n), ad) for (n, ad) in labeled_ang_dem]
     train_set, test_set = featuresets[int(len(featuresets)/4):], featuresets[:int(len(featuresets)/4)]
     adClassifier = nltk.NaiveBayesClassifier.train(train_set)
     #print(adClassifier.show_most_informative_features(20))
     #print(nltk.classify.accuracy(adClassifier, test_set))
-    a.close()
-    d.close()
     return adClassifier
 
-def pdClassifier():
+def pdClassifier(namesReader):
     """ Create and return an pokemon vs. digimon classifier. """
-    p = open('text_files/pokemon.txt', 'r')
-    d = open('text_files/digimon.txt', 'r')
-    labeled_pok_dig = ([(line.rstrip('\n'), 'pokemon') for line in p] +
-                        [(line.rstrip('\n'), 'digimon') for line in d])
+    pokemon = namesReader.words('pokemon.txt')
+    digimon = namesReader.words('digimon.txt')
+    labeled_pok_dig = ([(line.rstrip('\n'), 'pokemon') for line in pokemon] +
+                        [(line.rstrip('\n'), 'digimon') for line in digimon])
     random.shuffle(labeled_pok_dig)
     featuresets = [(name_features(n), pd) for (n, pd) in labeled_pok_dig]
     train_set, test_set = featuresets[int(len(featuresets)/4):], featuresets[:int(len(featuresets)/4)]
     pdClassifier = nltk.NaiveBayesClassifier.train(train_set)
     #print(pdClassifier.show_most_informative_features(20))
     #print(nltk.classify.accuracy(pdClassifier, test_set))
-    p.close()
-    d.close()
     return pdClassifier
 
 
-def userClassifier(userNames):
+def userClassifier(namesReader, userNames):
     """ Create and return a classifier based on user-provided names. """
-    n = open('text_files/names.txt', 'r') #name data from: https://github.com/hadley/data-baby-names
-    namesList = [line for line in n]
+    names = namesReader.words('names.txt') #name data from: https://github.com/hadley/data-baby-names
+    namesList = [line for line in names]
     random.shuffle(namesList)
     shorterNamesList = [] #This list is a list of random names equal in length to the number of names the user inputted. For comparative classification.
     i = 0
     while (len(shorterNamesList) <= len(userNames)) :
         shorterNamesList.append(namesList[i].rstrip('\n'))
         i = i + 1
-    labeled_user_names = ([(name, 'good') for name in userNames] + [(badName, 'bad') for badName in shorterNamesList])
+    labeled_user_names = ([(name, 'good') for name in userNames] +
+            [(badName, 'bad') for badName in shorterNamesList])
     random.shuffle(labeled_user_names)
     featuresets = [(name_features(n), g) for (n, g) in labeled_user_names]
     train_set, test_set = featuresets[int(len(featuresets)/4):], featuresets[:int(len(featuresets)/4)]
     userClassifier = nltk.NaiveBayesClassifier.train(train_set)
     #print(userClassifier.show_most_informative_features(20))
     #print(nltk.classify.accuracy(userClassifier, test_set))
-    n.close()
     return userClassifier
 
 
@@ -144,7 +138,15 @@ def multiClassifier(name, parameters, classifiers):
     return classification
 
 
-def main() :
+def main():
+
+    # Arguments: directory and the fileids
+    namesReader = WordListCorpusReader(
+                './names_corpus',
+                ['angels.txt', 'demons.txt', 'digimon.txt', 'fantasyNames.txt',
+                 'female.txt', 'female2.txt', 'heroes.txt', 'male.txt',
+                 'male2.txt', 'names.txt', 'pokemon.txt', 'villains.txt']
+            )
 
     # Will prompt user if they want to force a male or female name, if so outputs come from male.txt or female.txt instead of names.txt
     forceMale = False
@@ -196,27 +198,22 @@ def main() :
 
     # Run classifier on 'names.txt' or male.txt/female.txt if specified by user. Output 20 suggested names
     if (forceFantasy) :
-        f = open("text_files/fantasyNames.txt", 'r') #from http://www.creative-role-playing.com/fantasy-sounding-names/
-        namesList = [fname for fname in f.read().split()]
-        f.close()
+        fantasy = namesReader.words('fantasyNames.txt') #from http://www.creative-role-playing.com/fantasy-sounding-names/
+        namesList = [fanName for fanName in fantasy]
     elif (forceMale) :
-        a = open('text_files/male2.txt', 'r')
-        namesList = [line for line in a]
-        a.close()
+        male = namesReader.words('male2.txt')
+        namesList = [mName for mName in male]
     elif (forceFemale) :
-        a = open('text_files/female2.txt', 'r')
-        namesList = [line for line in a]
-        a.close()
+        female = namesReader.words('female2.txt')
+        namesList = [fmName for fmName in female]
     else:
-        nam = open('text_files/names.txt', 'r')
-        longListofNames = [name for name in nam.read().split()]
-        nam.close()
-        namesList = longListofNames
+        names = namesReader.words('names.txt')
+        namesList = [name for name in names]
 
 
     # Run classifiers on each name from names.txt until n names are found that match classifications from all relevant classifiers
     n = input("**How many suggested names would you like? Pick a number greater than 20.\n")
-    if n is "" :
+    if n is "":
     	n = "20"
     n = int(n)
     while n < 20:
@@ -226,7 +223,9 @@ def main() :
     random.shuffle(namesList)
 
     # Create the list of classifiers
-    classifiers = [hvClassifier(), mfClassifier(), adClassifier(), pdClassifier(), userClassifier(userNames)]
+    classifiers = [hvClassifier(namesReader), mfClassifier(namesReader),
+            adClassifier(namesReader), pdClassifier(namesReader),
+            userClassifier(namesReader, userNames)]
 
     # parameters starts as a list of Nones (as many as there are classifiers) and elements are updated
     parameters = [None]*(len(classifiers)-1)
